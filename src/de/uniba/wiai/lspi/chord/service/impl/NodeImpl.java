@@ -30,6 +30,8 @@ package de.uniba.wiai.lspi.chord.service.impl;
 import static de.uniba.wiai.lspi.util.logging.Logger.LogLevel.DEBUG;
 import static de.uniba.wiai.lspi.util.logging.Logger.LogLevel.INFO;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +50,7 @@ import de.uniba.wiai.lspi.chord.data.ID;
 import de.uniba.wiai.lspi.chord.data.URL;
 import de.uniba.wiai.lspi.chord.service.NotifyCallback;
 import de.uniba.wiai.lspi.util.logging.Logger;
+import ttv.Transaction;
 
 /**
  * Implements all operations which can be invoked remotely by other nodes.
@@ -432,11 +435,65 @@ public final class NodeImpl extends Node {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
+		List<Node> list = this.impl.getFingerTable();
+		if(Transaction.ID < info.getTransaction()) {
+			Transaction.ID = info.getTransaction();
+		}
+		mySort(list);
+		ID range;
+		for (int i = 0; i < list.size(); i++) {
+			if (i == (list.size() - 1)) {
+				range = this.impl.getID();
+			} else if (list.get(i).getNodeID() == list.get(i + 1).getNodeID()) {
+				continue;
+			} else {
+				range = list.get(i + 1).getNodeID();
+			}
+			if(list.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {
+				mySend(list.get(i),range,info);
+			}
+		}
 		
 		// finally inform application
 		if (this.notifyCallback != null) {
 			this.notifyCallback.broadcast(info.getSource(), info.getTarget(), info.getHit());
 		}
+	}
+	
+	public void mySort(List<Node> list) {
+		Collections.sort(list, new Comparator<Node>() {
+			@Override
+			public int compare(Node o1, Node o2) {
+				ID myId = impl.getID();
+				int comp1 = o1.getNodeID().compareTo(myId);
+				int comp2 = o2.getNodeID().compareTo(myId);
+				if ((comp1 * comp2) > 0) {
+					return o1.compareTo(o2);
+				}
+				if ((comp1 + comp2) > 0) {
+					return o1.compareTo(o2);
+				}
+				return o2.compareTo(o1);
+			}
+		});
+	}
+	
+	public void mySend(final Node node, final ID range, final Broadcast info) {
+		Runnable threadBroadcast = new Runnable() {
+			@Override
+			public void run() {
+				Broadcast broadcast = new Broadcast(range, info.getSource(), info.getTarget(), info.getTransaction(),
+						info.getHit());
+				try {
+					node.broadcast(broadcast);
+				} catch (CommunicationException e) {
+					logger.error(e.getMessage());
+				}
+			}
+
+		};
+		asyncExecutor.execute(threadBroadcast);
+
 	}
 
 }

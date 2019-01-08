@@ -1119,25 +1119,12 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 	@Override
 	public void broadcast(ID target, Boolean hit) {
 		this.logger.debug("App called broadcast");
-		List<Node> list = getFingerTable();
-		mySort(list);
-		Broadcast bc = null;
-		ID range;
 		Transaction.ID++;
-		for (int i = 0; i < list.size(); i++) {
-			if (i == (list.size() - 1)) {
-				range = getID();
-			} else if (list.get(i).getNodeID() == list.get(i + 1).getNodeID()) {
-				continue;
-			} else {
-				range = list.get(i + 1).getNodeID();
-			}
-			try {
-				bc = new Broadcast(range, this.getID(), target, Transaction.ID, hit);
-				list.get(i).broadcast(bc);
-			} catch (CommunicationException e) {
-				e.printStackTrace();
-			}
+		Broadcast info = new Broadcast(this.getID(), this.getID(), target, Transaction.ID, hit);
+		try {
+			localNode.broadcast(info);
+		} catch (CommunicationException e) {
+			e.printStackTrace();
 		}
 	}
 
