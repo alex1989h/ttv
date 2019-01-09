@@ -444,7 +444,7 @@ public final class NodeImpl extends Node {
 		
 		
 		List<Node> fingertable = this.impl.getFingerTable();
-		sortFingerTable(fingertable);
+		this.impl.sortFingerTable(fingertable);
 		
 		ID range = null;
 		for (int i = 0; i < fingertable.size(); i++) {
@@ -462,7 +462,7 @@ public final class NodeImpl extends Node {
 				if(!(range.isInInterval(fingertable.get(i).getNodeID(), info.getRange()))) {
 					range = info.getRange();
 				}
-				mySend(fingertable.get(i),range,info);
+				asyncBroadcast(fingertable.get(i),range,info);
 			}
 		}
 		
@@ -472,30 +472,7 @@ public final class NodeImpl extends Node {
 		}
 	}
 	
-	/**
-	 * Die Methode sortiert die Finger Table, so dass unsere Id an erster Stelle steht.
-	 * Anschließend folgt immer der nächst höhere Eintrag im Chord-Ring.
-	 * @param list
-	 */
-	public void sortFingerTable(List<Node> list) {
-		Collections.sort(list, new Comparator<Node>() {
-			@Override
-			public int compare(Node o1, Node o2) {
-				ID myId = impl.getID();
-				int comp1 = o1.getNodeID().compareTo(myId);
-				int comp2 = o2.getNodeID().compareTo(myId);
-				if ((comp1 * comp2) > 0) {
-					return o1.compareTo(o2);
-				}
-				if ((comp1 + comp2) > 0) {
-					return o1.compareTo(o2);
-				}
-				return o2.compareTo(o1);
-			}
-		});
-	}
-	
-	public void mySend(final Node node, final ID range, final Broadcast info) {
+	public void asyncBroadcast(final Node node, final ID range, final Broadcast info) {
 		Runnable threadBroadcast = new Runnable() {
 			@Override
 			public void run() {

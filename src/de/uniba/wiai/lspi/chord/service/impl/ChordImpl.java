@@ -1177,5 +1177,39 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 			this.localNode.clearCallback();
 		}
 	}
+	
+	public void asyncRetrieve(final ID targetID) {
+		Runnable threadRetrieve = new Runnable() {
+			@Override
+			public void run() {
+				retrieve(targetID);
+			}
+
+		};
+		asyncExecutor.execute(threadRetrieve);
+	}
+	
+	/**
+	 * Die Methode sortiert die Finger Table, so dass unsere Id an erster Stelle steht.
+	 * Anschließend folgt immer der nächst höhere Eintrag im Chord-Ring.
+	 * @param list
+	 */
+	public void sortFingerTable(List<Node> list) {
+		Collections.sort(list, new Comparator<Node>() {
+			@Override
+			public int compare(Node o1, Node o2) {
+				ID myId = getID();
+				int comp1 = o1.getNodeID().compareTo(myId);
+				int comp2 = o2.getNodeID().compareTo(myId);
+				if ((comp1 * comp2) > 0) {
+					return o1.compareTo(o2);
+				}
+				if ((comp1 + comp2) > 0) {
+					return o1.compareTo(o2);
+				}
+				return o2.compareTo(o1);
+			}
+		});
+	}
 
 }
