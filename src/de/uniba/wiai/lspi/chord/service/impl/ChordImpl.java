@@ -1114,8 +1114,13 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 		return ChordRemoveFuture.create(this.asyncExecutor, this, key, entry);
 	}
 	
-	// TODO: implement this function in TTP 
-	//send broadcast to all nodes in finger table
+
+	/**
+	 * 	Die Methode wird aufgerufen, wenn auf eines unserer Felder geschossen wird.
+	 *	Nun muss allen anderen Knoten über Broadcast das Ergebnis der Angriffes mitgeteilt werden.
+	 * 	Dazu wird ein Broadcastobjekt erstellt und dies weiter an die NodeImpl delegiert,
+	 *  um den Broadcast auszuführen.
+	 */
 	@Override
 	public void broadcast(ID target, Boolean hit) {
 		this.logger.debug("App called broadcast");

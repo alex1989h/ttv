@@ -429,38 +429,48 @@ public final class NodeImpl extends Node {
 		return this.asyncExecutor;
 	}
 	
-	// TODO: implement this function in TTP
+	/**
+	 * Die Methode 
+	 */
 	@Override
 	public final void broadcast(Broadcast info) throws CommunicationException {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
-		List<Node> list = this.impl.getFingerTable();
+		
 		if(Transaction.ID < info.getTransaction()) {
 			Transaction.ID = info.getTransaction();
 		}
-		mySort(list);
-		ID range;
-		for (int i = 0; i < list.size(); i++) {
-			if (i == (list.size() - 1)) {
+		
+		List<Node> fingertable = this.impl.getFingerTable();
+		sortFingerTable(fingertable);
+		
+		ID range = null;
+		for (int i = 0; i < fingertable.size(); i++) {
+			if (i == (fingertable.size() - 1)) {
 				range = this.impl.getID();
-			} else if (list.get(i).getNodeID() == list.get(i + 1).getNodeID()) {
+			} else if (fingertable.get(i).getNodeID() == fingertable.get(i + 1).getNodeID()) {
 				continue;
 			} else {
-				range = list.get(i + 1).getNodeID();
+				range = fingertable.get(i + 1).getNodeID();
 			}
-			if(list.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {
-				mySend(list.get(i),range,info);
+			if(fingertable.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {
+				mySend(fingertable.get(i),range,info);
 			}
 		}
 		
-		// finally inform application
+		// Der Anwendung, das Ereignis mitteilen
 		if (this.notifyCallback != null) {
 			this.notifyCallback.broadcast(info.getSource(), info.getTarget(), info.getHit());
 		}
 	}
 	
-	public void mySort(List<Node> list) {
+	/**
+	 * Die Methode sortiert die Finger Table, so dass unsere Id an erster Stelle steht.
+	 * Anschließend folgt immer der nächst höhere Eintrag im Chord-Ring.
+	 * @param list
+	 */
+	public void sortFingerTable(List<Node> list) {
 		Collections.sort(list, new Comparator<Node>() {
 			@Override
 			public int compare(Node o1, Node o2) {
