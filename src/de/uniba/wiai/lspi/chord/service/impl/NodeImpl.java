@@ -442,11 +442,14 @@ public final class NodeImpl extends Node {
 			Transaction.ID = info.getTransaction();
 		}
 		
+		
 		List<Node> fingertable = this.impl.getFingerTable();
 		sortFingerTable(fingertable);
 		
 		ID range = null;
 		for (int i = 0; i < fingertable.size(); i++) {
+			
+			
 			if (i == (fingertable.size() - 1)) {
 				range = this.impl.getID();
 			} else if (fingertable.get(i).getNodeID() == fingertable.get(i + 1).getNodeID()) {
@@ -454,7 +457,11 @@ public final class NodeImpl extends Node {
 			} else {
 				range = fingertable.get(i + 1).getNodeID();
 			}
-			if(fingertable.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {
+			
+			if(fingertable.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {  
+				if(!(range.isInInterval(fingertable.get(i).getNodeID(), info.getRange()))) {
+					range = info.getRange();
+				}
 				mySend(fingertable.get(i),range,info);
 			}
 		}

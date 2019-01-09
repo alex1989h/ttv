@@ -1116,7 +1116,7 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 	
 
 	/**
-	 * 	Die Methode wird aufgerufen, wenn auf eines unserer Felder geschossen wird.
+	 * 	Die Methode wird von unserer Spiellogik aufgerufen, wenn auf eines unserer Felder geschossen wurde.
 	 *	Nun muss allen anderen Knoten über Broadcast das Ergebnis der Angriffes mitgeteilt werden.
 	 * 	Dazu wird ein Broadcastobjekt erstellt und dies weiter an die NodeImpl delegiert,
 	 *  um den Broadcast auszuführen.
