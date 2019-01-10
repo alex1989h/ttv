@@ -7,6 +7,9 @@ import de.uniba.wiai.lspi.chord.data.ID;
 
 public class Spieler {
 	
+	private int id;
+	private static int ids = 0;
+	
 	protected int[] felder;
 	
 	protected ID spielerID;
@@ -15,6 +18,8 @@ public class Spieler {
 	
 
 	public Spieler(int intervalls,ID spielerID,ID previousPlayerID) {
+		id = ids;
+		ids++;
 		this.felder = new int[intervalls];
 		
 		this.spielerID = spielerID;
@@ -94,8 +99,8 @@ public class Spieler {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+//		if (getClass() != obj.getClass())
+//			return false;
 		Spieler other = (Spieler) obj;
 		if (spielerID == null) {
 			if (other.spielerID != null)
@@ -107,6 +112,6 @@ public class Spieler {
 	
 	@Override
 	public String toString() {
-		return "Spieler:\nID: "+spielerID+"\nPrevID: "+previousPlayerID;
+		return "Spieler+ "+id+":\nID: "+spielerID+"\nPrevID: "+previousPlayerID;
 	}
 }

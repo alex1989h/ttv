@@ -72,16 +72,24 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	@Override
 	public void retrieved(ID target) {
+		System.out.println("==== RETRIEVED ====");
 		System.out.println("Auf mich wurde geschoﬂen");
 		aktualisiertSpieler();
 		System.out.println("Spieler wurden aktualisiert");
-		boolean treffer = wurdeSchiffgetroffen(target);
+		boolean treffer = wurdMeinSchiffVersenkt(target);
 		System.out.println("Wurde getroffen: "+ treffer);
 		chord.broadcast(target, treffer);
 		System.out.println("Broadcast erstellt");
 		Spieler zielSpieler = waehleZiel();
+		System.out.println("Mein Angriffziel: "+zielSpieler);
 		ID newTarget = waehleTarget(zielSpieler);
+		if(newTarget.isInInterval(zielSpieler.getPreviousPlayerID(), zielSpieler.getSpielerID())) {
+			System.out.println("Die Ziel-ID ist im richtigen Bereich vom Spieler");
+		}else {
+			System.out.println("ACHTUNG: Die Ziel-ID ist nicht imrichtigen Bereich vom Spieler");
+		}
 		chord.asyncRetrieve(newTarget);
+		System.out.println("==== RETRIEVED END ====");
 	}
 	
 
@@ -90,48 +98,40 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	@Override
 	public void broadcast(ID source, ID target, Boolean hit) {
+		System.out.println("==== BROADCAST ====");
 		System.out.println("Auf jemanden wurde geschoﬂen");
+		System.out.println("Source: "+source+"\nTarget: "+target+"\nHit: "+hit);
 		aktualisiertSpieler();
 		fuegeSpielerhinzu(source);
 		for (Spieler spieler2 : spieler) {
 			aktualisiereSchiffe(target,hit,spieler2);
 		}
+		System.out.println("==== BROADCAST END ====");
 	}
 
 	private void aktualisiereSchiffe(ID target,boolean hit, Spieler spieler2) {
 		if(target.isInInterval(spieler2.getPreviousPlayerID(), spieler2.getSpielerID())||
 				target.equals(spieler2.getSpielerID())) {
-			BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
-			BigInteger id = target.toBigInteger();
-			BigInteger prevId = spieler2.getPreviousPlayerID().toBigInteger();
-			BigInteger myId = spieler2.getSpielerID().toBigInteger();
-			
-			BigInteger mod1 = myId.subtract(prevId).mod(idsRaum);
-			BigInteger mod2 = id.subtract(prevId).mod(idsRaum);
-			
-			BigInteger intervall = mod1.divide(BigInteger.valueOf(100));
-			
-			int index = 0;
-			while(intervall.compareTo(mod2) <= 0 && index < 99) {
-				intervall = intervall.add(intervall);
-				index++;
-			}
-			
+			int index = iDToIndex(target, spieler2);
 			spieler2.feldaktualisieren(index, hit);
-			System.out.println(spieler2+"\nTarget: "+target+"\nIndex: "+index+"\nGetroffen: "+hit);
-			System.out.println("Hits: "+spieler2.getHits()+"Frei: "+spieler2.getVerfuegbareFelder().size());
+			System.out.println("=== Aktualisiere Spieler ===");
+			System.out.println(spieler2);
+			System.out.println("\nTarget: "+target+"\nIndex: "+index+"\nGetroffen: "+hit);
+			System.out.println("Hits: "+spieler2.getHits()+" Frei: "+spieler2.getVerfuegbareFelder().size());
+			System.out.println("=== Aktualisiere Spieler END ===");
 		}
 	}
 
 	private void fuegeSpielerhinzu(ID source) {
 		Spieler newSpieler = new Spieler(SchiffeVersenken.ANZAHLINTERVALLE, source, null);
-		if(!spieler.contains(newSpieler)) {
+		if(!spieler.contains(newSpieler) && !newSpieler.equals(meinSpieler)) {
 			ID prevID = meinSpieler.getSpielerID();
 			for (Spieler spieler2 : spieler) {
 				if(spieler2.getSpielerID().isInInterval(prevID, newSpieler.getSpielerID())) {
 					prevID = spieler2.getSpielerID();
 				}
 			}
+			newSpieler.setPreviousPlayerID(prevID);
 			spieler.add(newSpieler);
 			for (Spieler spieler2 : spieler) {
 				prevID = spieler2.getPreviousPlayerID();
@@ -142,7 +142,11 @@ public class Spielverwaltung implements NotifyCallback {
 					spieler2.setPreviousPlayerID(prevID);
 				}
 			}
-			
+			System.out.println("=== Spieler in der Liste ===");
+			for (Spieler spieler2 : spieler) {
+				System.out.println(spieler2);
+			}
+			System.out.println("=== Spieler in der Liste END ===");
 		}
 	}
 
@@ -157,14 +161,10 @@ public class Spielverwaltung implements NotifyCallback {
 		Random rand = new Random();
 		int zahl = rand.nextInt(leererFelder.size());
 		int index = leererFelder.get(zahl);
-		BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
-		BigInteger spielerId = zielSpieler.getSpielerID().toBigInteger();
-		BigInteger previousId = zielSpieler.getPreviousPlayerID().toBigInteger();
-		index++;
-		ID newTarget = ID.valueOf(spielerId.subtract(previousId).mod(idsRaum)
-		.divide(BigInteger.valueOf(100))
-		.multiply(BigInteger.valueOf(index)).add(previousId).mod(idsRaum));
-		return newTarget;
+		ID id = indexToID(index, zielSpieler);
+		System.out.println("Ziel-Index: "+index);
+		System.out.println("Ziel-ID: "+id);
+		return id;
 	}
 	
 	/**
@@ -175,6 +175,9 @@ public class Spielverwaltung implements NotifyCallback {
 		Spieler zielSpieler = spieler.get(0);
 		for (Spieler spieler2 : spieler) {
 			if(spieler2.getHits() > zielSpieler.getHits()) {
+				zielSpieler = spieler2;
+			} else if(spieler2.getHits() == zielSpieler.getHits()
+					&& spieler2.getVerfuegbareFelder().size() < zielSpieler.getVerfuegbareFelder().size()){
 				zielSpieler = spieler2;
 			}
 		}
@@ -187,26 +190,13 @@ public class Spielverwaltung implements NotifyCallback {
 	 * @param target
 	 * @return true wenn ein Schiff getroffen wurde
 	 */
-	private boolean wurdeSchiffgetroffen(ID target) {
+	private boolean wurdMeinSchiffVersenkt(ID target) {
 		boolean getroffen = false;
 		if(target.isInInterval(meinSpieler.getPreviousPlayerID(), meinSpieler.getSpielerID())||
 				target.equals(meinSpieler.getSpielerID())) {
-			BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
-			BigInteger id = target.toBigInteger();
-			BigInteger myId = meinSpieler.getSpielerID().toBigInteger();
-			BigInteger prevId = meinSpieler.getPreviousPlayerID().toBigInteger();
-			
-			BigInteger mod1 = myId.subtract(prevId).mod(idsRaum);
-			BigInteger mod2 = id.subtract(prevId).mod(idsRaum);
-			
-			BigInteger intervall = mod1.divide(BigInteger.valueOf(100));
-			
-			int index = 0;
-			while(intervall.compareTo(mod2) <= 0 && index < 99) {
-				intervall = intervall.add(intervall);
-				index++;
-			}
+			int index = iDToIndex(target, meinSpieler);
 			getroffen = meinSpieler.angriff(index);
+			System.out.println("ICH:");
 			System.out.println("Target: "+target+"\nIndex: "+index+"\nGetroffen: "+getroffen);
 			System.out.println("Hits: "+meinSpieler.getHits()+"Frei: "+meinSpieler.getVerfuegbareFelder().size());
 			
@@ -284,11 +274,51 @@ public class Spielverwaltung implements NotifyCallback {
 			System.out.println("Schieﬂe zuerst!");
 			Spieler zielSpieler = waehleZiel();
 			ID newTarget = waehleTarget(zielSpieler);
-			System.out.println("Target: "+newTarget);
 			chord.asyncRetrieve(newTarget);
 			System.out.println("Geschoﬂen");
 		}else {
 			System.out.println("Schieﬂe NICHT!");
 		}
+	}
+	
+	public int iDToIndex(ID target, Spieler spieler2) {
+		BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
+		BigInteger id = target.toBigInteger();
+		BigInteger myId = spieler2.getSpielerID().toBigInteger();
+		BigInteger prevId = spieler2.getPreviousPlayerID().toBigInteger();
+		
+		BigInteger mod1 = myId.subtract(prevId).mod(idsRaum);
+		BigInteger mod2 = id.subtract(prevId).mod(idsRaum);
+		
+		BigInteger intervall = mod1.divide(BigInteger.valueOf(SchiffeVersenken.ANZAHLINTERVALLE));
+		BigInteger sum = intervall;
+		int index = 0;
+		while(sum.compareTo(mod2) < 0) {
+			sum = sum.add(intervall);
+			index++;
+			/**
+			 * F¸r den Fall, dass er ¸ber die maximale ID Raum f¸r diesen Spieler geht
+			 */
+			if(index >= SchiffeVersenken.ANZAHLINTERVALLE) {
+				index = 99;
+				break;
+			}
+		}
+		return index;
+	}
+	
+	public ID indexToID(int index, Spieler spieler2) {
+		BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
+		BigInteger spielerId = spieler2.getSpielerID().toBigInteger();
+		BigInteger previousId = spieler2.getPreviousPlayerID().toBigInteger();
+		
+		BigInteger mod1 = spielerId.subtract(previousId).mod(idsRaum);
+		
+		BigInteger intervall = mod1.divide(BigInteger.valueOf(SchiffeVersenken.ANZAHLINTERVALLE));
+		
+		index++;
+		BigInteger newTarget = intervall.multiply(BigInteger.valueOf(index))
+				.add(previousId).mod(idsRaum);
+		return ID.valueOf(newTarget);
 	}
 }
