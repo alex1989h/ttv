@@ -105,4 +105,8 @@ public class Spieler {
 		return true;
 	}
 	
+	@Override
+	public String toString() {
+		return "Spieler:\nID: "+spielerID+"\nPrevID: "+previousPlayerID;
+	}
 }

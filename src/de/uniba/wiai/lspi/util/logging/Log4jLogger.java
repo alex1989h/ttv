@@ -164,22 +164,22 @@ public class Log4jLogger extends Logger {
 
 	@Override
 	public void debug(Object msg) {
-		this.logger.log(this.myFQN, org.apache.log4j.Level.DEBUG, msg, null);
+//		this.logger.log(this.myFQN, org.apache.log4j.Level.DEBUG, msg, null);
 	}
 
 	@Override
 	public void debug(Object msg, Throwable t) {
-		this.logger.log(this.myFQN, org.apache.log4j.Level.DEBUG, msg, t);
+//		this.logger.log(this.myFQN, org.apache.log4j.Level.DEBUG, msg, t);
 	}
 
 	@Override
 	public void info(Object msg) {
-		this.logger.log(this.myFQN, org.apache.log4j.Level.INFO, msg, null);
+//		this.logger.log(this.myFQN, org.apache.log4j.Level.INFO, msg, null);
 	}
 
 	@Override
 	public void info(Object msg, Throwable t) {
-		this.logger.log(this.myFQN, org.apache.log4j.Level.INFO, msg, t);
+//		this.logger.log(this.myFQN, org.apache.log4j.Level.INFO, msg, t);
 
 	}
 

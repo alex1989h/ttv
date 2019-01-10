@@ -13,6 +13,7 @@ import de.uniba.wiai.lspi.chord.service.NotifyCallback;
 import de.uniba.wiai.lspi.chord.service.PropertiesLoader;
 import de.uniba.wiai.lspi.chord.service.ServiceException;
 import de.uniba.wiai.lspi.chord.service.impl.ChordImpl;
+import de.uniba.wiai.lspi.util.logging.Logger;
 
 public class Spielverwaltung implements NotifyCallback {
 	
@@ -22,9 +23,12 @@ public class Spielverwaltung implements NotifyCallback {
 	
 	private ChordImpl chord;
 	
+	private Logger logger;
+	
 	 public Spielverwaltung(boolean createChordNetwork) {
-		 
+		this.logger = Logger.getLogger(Spielverwaltung.class.getName());
 		PropertiesLoader.loadPropertyFile();
+		spieler = new ArrayList<Spieler>();
 		String protocol = URL.KNOWN_PROTOCOLS.get(URL.SOCKET_PROTOCOL);
 		URL localURL = null;
 		try {
@@ -39,6 +43,7 @@ public class Spielverwaltung implements NotifyCallback {
 		if(createChordNetwork) {
 			try {
 				chord.create(localURL);
+				System.out.println("Netzwerk erstellt");
 			} catch (ServiceException e) {
 				throw new RuntimeException ( " Could not create DHT !" , e ) ;
 			}
@@ -53,44 +58,26 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 			try {
 				chord.join(localURL, bootstrapURL);
+				System.out.println("Netzwerk beigetretten");
 			} catch (ServiceException e) {
 				throw new RuntimeException ( " Could not join DHT ! " , e );
 			}
 		}
-		
-		
-		
-		 
-		 meinSpieler = new MeinSpieler(SchiffeVersenken.ANZAHLINTERVALLE, chord.getID(), chord.getPredecessorID());
-		 List<Integer> list = new ArrayList<Integer>();
-		 
-		 for(int i=0;i<SchiffeVersenken.ANZAHLSCHIFFE;i++) {
-			 Random rand = new Random();
-			 int zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
-			 
-			 while(list.contains(zahl)) {
-				 zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
-			 }
-			 list.add(zahl);
-		 }
-		 
-		 meinSpieler.setzeSchiffe(list);
-		 
-		 spieler = new ArrayList<Spieler>();
-		 
-		 
-		 
-		
 	}
+	
 	
 	/**
 	 * Wird aufgerufen wenn wir beschossen wurden
 	 */
 	@Override
 	public void retrieved(ID target) {
+		System.out.println("Auf mich wurde geschoﬂen");
 		aktualisiertSpieler();
+		System.out.println("Spieler wurden aktualisiert");
 		boolean treffer = wurdeSchiffgetroffen(target);
+		System.out.println("Wurde getroffen: "+ treffer);
 		chord.broadcast(target, treffer);
+		System.out.println("Broadcast erstellt");
 		Spieler zielSpieler = waehleZiel();
 		ID newTarget = waehleTarget(zielSpieler);
 		chord.asyncRetrieve(newTarget);
@@ -102,6 +89,7 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	@Override
 	public void broadcast(ID source, ID target, Boolean hit) {
+		System.out.println("Auf jemanden wurde geschoﬂen");
 		aktualisiertSpieler();
 		fuegeSpielerhinzu(source);
 		for (Spieler spieler2 : spieler) {
@@ -133,6 +121,8 @@ public class Spielverwaltung implements NotifyCallback {
 				index--;
 			}
 			spieler2.feldaktualisieren(index, hit);
+			System.out.println(spieler2+"\nTarget: "+target+"\nIndex: "+index+"\nGetroffen: "+hit);
+			System.out.println("Hits: "+spieler2.getHits()+"Frei: "+spieler2.getVerfuegbareFelder().size());
 		}
 	}
 
@@ -202,12 +192,15 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	private boolean wurdeSchiffgetroffen(ID target) {
 		boolean getroffen = false;
+		System.out.println("Anfang");
 		if(target.isInInterval(meinSpieler.getPreviousPlayerID(), meinSpieler.getSpielerID())||
 				target.equals(meinSpieler.getSpielerID())) {
+			System.out.println("Im IF");
 			BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
 			BigInteger id = target.toBigInteger();
 			BigInteger myId = meinSpieler.getPreviousPlayerID().toBigInteger();
 			BigInteger prevId = meinSpieler.getSpielerID().toBigInteger();
+			
 			double indexD = BigInteger.valueOf(100)
 					.divide(myId.subtract(prevId).mod(idsRaum))
 					.multiply(id.subtract(prevId).mod(idsRaum)).doubleValue();
@@ -225,7 +218,11 @@ public class Spielverwaltung implements NotifyCallback {
 				index--;
 			}
 			getroffen = meinSpieler.angriff(index);
+			System.out.println("Target: "+target+"\nIndex: "+index+"\nGetroffen: "+getroffen);
+			System.out.println("Hits: "+meinSpieler.getHits()+"Frei: "+meinSpieler.getVerfuegbareFelder().size());
+			
 		}
+		System.out.println("Ende");
 		return getroffen;
 	}
 
@@ -271,5 +268,39 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 		}
 		
+	}
+
+
+	public void erstelleSpiel() {
+		meinSpieler = new MeinSpieler(SchiffeVersenken.ANZAHLINTERVALLE, chord.getID(), chord.getPredecessorID());
+		 List<Integer> list = new ArrayList<Integer>();
+		 
+		 for(int i=0;i<SchiffeVersenken.ANZAHLSCHIFFE;i++) {
+			 Random rand = new Random();
+			 int zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
+			 
+			 while(list.contains(zahl)) {
+				 zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
+			 }
+			 list.add(zahl);
+		 }
+		 meinSpieler.setzeSchiffe(list);
+		 aktualisiertSpieler();
+		 
+		 System.out.println("Mein Spieler:"+meinSpieler);
+		 for (Spieler spieler2 : spieler) {
+			System.out.println(spieler2);
+		}
+		ID maxID = ID.valueOf(BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1)));
+		if(maxID.isInInterval(meinSpieler.previousPlayerID, meinSpieler.getSpielerID())) {
+			System.out.println("Schieﬂe zuerst!");
+			Spieler zielSpieler = waehleZiel();
+			ID newTarget = waehleTarget(zielSpieler);
+			System.out.println("Target: "+newTarget);
+			chord.asyncRetrieve(newTarget);
+			System.out.println("Geschoﬂen");
+		}else {
+			System.out.println("Schieﬂe NICHT!");
+		}
 	}
 }
