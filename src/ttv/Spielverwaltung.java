@@ -206,16 +206,6 @@ public class Spielverwaltung implements NotifyCallback {
 				intervall = intervall.add(intervall);
 				index++;
 			}
-			/*
-			 * Wenn IndexD = 1 ist, muss Index=0 gewählt werden(erster Eintrag)
-			 * Wenn IndexD = 1.1 ist, muss Index=1 gewählt werden(zweiter Entrag)
-			 * Deshalb die If-Anweisung
-			 * Beispiel: IndexD=0.1 > Index=0 also wähle Index= 0
-			 * Beispiel: IndexD=100(MAX) > Index=100 also wähle Index=99(siehe index--)
-			 * IndexD=0 kann nicht vorkommen sonst wäre es ein Spieler vor uns
-			 * 
-			 */
-			System.out.println("Index: "+ index);
 			getroffen = meinSpieler.angriff(index);
 			System.out.println("Target: "+target+"\nIndex: "+index+"\nGetroffen: "+getroffen);
 			System.out.println("Hits: "+meinSpieler.getHits()+"Frei: "+meinSpieler.getVerfuegbareFelder().size());
