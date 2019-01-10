@@ -1,5 +1,6 @@
 package ttv;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -102,24 +103,20 @@ public class Spielverwaltung implements NotifyCallback {
 				target.equals(spieler2.getSpielerID())) {
 			BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
 			BigInteger id = target.toBigInteger();
-			BigInteger myId = spieler2.getPreviousPlayerID().toBigInteger();
-			BigInteger prevId = spieler2.getSpielerID().toBigInteger();
-			double indexD = BigInteger.valueOf(100)
-					.divide(myId.subtract(prevId).mod(idsRaum))
-					.multiply(id.subtract(prevId).mod(idsRaum)).doubleValue();
-			int index = (int) indexD;
-			/*
-			 * Wenn IndexD = 1 ist, muss Index=0 gewählt werden(erster Eintrag)
-			 * Wenn IndexD = 1.1 ist, muss Index=1 gewählt werden(zweiter Entrag)
-			 * Deshalb die If-Anweisung
-			 * Beispiel: IndexD=0.1 > Index=0 also wähle Index= 0
-			 * Beispiel: IndexD=100(MAX) > Index=100 also wähle Index=99(siehe index--)
-			 * IndexD=0 kann nicht vorkommen sonst wäre es ein Spieler vor uns
-			 * 
-			 */
-			if(!(indexD > index)) {
-				index--;
+			BigInteger prevId = spieler2.getPreviousPlayerID().toBigInteger();
+			BigInteger myId = spieler2.getSpielerID().toBigInteger();
+			
+			BigInteger mod1 = myId.subtract(prevId).mod(idsRaum);
+			BigInteger mod2 = id.subtract(prevId).mod(idsRaum);
+			
+			BigInteger intervall = mod1.divide(BigInteger.valueOf(100));
+			
+			int index = 0;
+			while(intervall.compareTo(mod2) <= 0 && index < 99) {
+				intervall = intervall.add(intervall);
+				index++;
 			}
+			
 			spieler2.feldaktualisieren(index, hit);
 			System.out.println(spieler2+"\nTarget: "+target+"\nIndex: "+index+"\nGetroffen: "+hit);
 			System.out.println("Hits: "+spieler2.getHits()+"Frei: "+spieler2.getVerfuegbareFelder().size());
@@ -192,19 +189,23 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	private boolean wurdeSchiffgetroffen(ID target) {
 		boolean getroffen = false;
-		System.out.println("Anfang");
 		if(target.isInInterval(meinSpieler.getPreviousPlayerID(), meinSpieler.getSpielerID())||
 				target.equals(meinSpieler.getSpielerID())) {
-			System.out.println("Im IF");
 			BigInteger idsRaum = BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1));
 			BigInteger id = target.toBigInteger();
-			BigInteger myId = meinSpieler.getPreviousPlayerID().toBigInteger();
-			BigInteger prevId = meinSpieler.getSpielerID().toBigInteger();
+			BigInteger myId = meinSpieler.getSpielerID().toBigInteger();
+			BigInteger prevId = meinSpieler.getPreviousPlayerID().toBigInteger();
 			
-			double indexD = BigInteger.valueOf(100)
-					.divide(myId.subtract(prevId).mod(idsRaum))
-					.multiply(id.subtract(prevId).mod(idsRaum)).doubleValue();
-			int index = (int) indexD;
+			BigInteger mod1 = myId.subtract(prevId).mod(idsRaum);
+			BigInteger mod2 = id.subtract(prevId).mod(idsRaum);
+			
+			BigInteger intervall = mod1.divide(BigInteger.valueOf(100));
+			
+			int index = 0;
+			while(intervall.compareTo(mod2) <= 0 && index < 99) {
+				intervall = intervall.add(intervall);
+				index++;
+			}
 			/*
 			 * Wenn IndexD = 1 ist, muss Index=0 gewählt werden(erster Eintrag)
 			 * Wenn IndexD = 1.1 ist, muss Index=1 gewählt werden(zweiter Entrag)
@@ -214,15 +215,12 @@ public class Spielverwaltung implements NotifyCallback {
 			 * IndexD=0 kann nicht vorkommen sonst wäre es ein Spieler vor uns
 			 * 
 			 */
-			if(!(indexD > index)) {
-				index--;
-			}
+			System.out.println("Index: "+ index);
 			getroffen = meinSpieler.angriff(index);
 			System.out.println("Target: "+target+"\nIndex: "+index+"\nGetroffen: "+getroffen);
 			System.out.println("Hits: "+meinSpieler.getHits()+"Frei: "+meinSpieler.getVerfuegbareFelder().size());
 			
-		}
-		System.out.println("Ende");
+		};
 		return getroffen;
 	}
 

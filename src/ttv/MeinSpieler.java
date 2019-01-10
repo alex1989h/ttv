@@ -22,6 +22,7 @@ public class MeinSpieler extends Spieler {
 		if(felder[index] == 1) {
 			return true;
 		}else {
+			felder[index] = -1;
 			return false;
 		}
 	}
