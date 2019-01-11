@@ -310,12 +310,12 @@ public class Spielverwaltung implements NotifyCallback {
 				int index = spielerListe.indexOf(newSpieler);
 				newSpieler = spielerListe.get(index);
 				if(i == 0) {
-					if(!(newSpieler.getPreviousPlayerID().isInInterval(meinSpieler.getSpielerID(), newSpieler.spielerID))) {
+					if(!(newSpieler.getPreviousPlayerID().isInInterval(meinSpieler.getSpielerID(), newSpieler.getSpielerID()))) {
 						newSpieler.setPreviousPlayerID(meinSpieler.getSpielerID());
 					}
 				} else {
 					Node prevNode = fingerTable.get(i-1);
-					if(!(newSpieler.getPreviousPlayerID().isInInterval(prevNode.getNodeID(), newSpieler.spielerID))) {
+					if(!(newSpieler.getPreviousPlayerID().isInInterval(prevNode.getNodeID(), newSpieler.getSpielerID()))) {
 						newSpieler.setPreviousPlayerID(prevNode.getNodeID());
 					}
 				}
@@ -367,12 +367,16 @@ public class Spielverwaltung implements NotifyCallback {
 			System.out.println("GEG: "+spieler);
 		}
 		ID maxID = ID.valueOf(BigInteger.valueOf(2).pow(160).subtract(BigInteger.valueOf(1)));
-		if(maxID.isInInterval(meinSpieler.previousPlayerID, meinSpieler.getSpielerID())) {
+		if(meinSpieler.getPreviousPlayerID() != null && maxID.isInInterval(meinSpieler.getPreviousPlayerID(), meinSpieler.getSpielerID())) {
 			System.out.println("Schieﬂe zuerst!");
 			Spieler zielSpieler = waehleZiel();
-			ID newTarget = waehleTarget(zielSpieler);
-			chord.asyncRetrieve(newTarget);
-			System.out.println("Geschoﬂen");
+			if(zielSpieler != null) {
+				ID newTarget = waehleTarget(zielSpieler);
+				chord.asyncRetrieve(newTarget);
+				System.out.println("Geschoﬂen");
+			}else {
+				System.out.println("Niemand da auf dem man schieﬂen kann");
+			}
 		}else {
 			System.out.println("Schieﬂe NICHT!");
 		}

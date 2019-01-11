@@ -13,9 +13,9 @@ public class Spieler {
 	
 	protected int[] felder;
 	
-	protected ID spielerID;
+	private ID spielerID;
 	
-	protected ID previousPlayerID;
+	private ID previousPlayerID;
 	
 
 	public Spieler(int intervalls,ID spielerID,ID previousPlayerID) {
@@ -113,10 +113,10 @@ public class Spieler {
 	
 	@Override
 	public String toString() {
-		String myID = spielerID.toString();
-		String prevID = previousPlayerID.toString();
-		myID = myID.substring(0, 12) + " ... " + myID.substring(myID.length() - 12);
-		prevID = prevID.substring(0, 12) + "... " + prevID.substring(prevID.length() - 12);
+		String myID = spielerID != null? spielerID.toString():null;
+		String prevID = previousPlayerID != null? previousPlayerID.toString():null;
+		myID = myID != null? myID.substring(0, 12) + " ... " + myID.substring(myID.length() - 12):null;
+		prevID = prevID != null? prevID.substring(0, 12) + "... " + prevID.substring(prevID.length() - 12):null;
 		return "Spieler " + id + " ID: " + myID + " PrevID: " + prevID + " Hits: " + getHits() + " Frei: "
 				+ getVerfuegbareFelder().size();
 	}
