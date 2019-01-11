@@ -156,6 +156,10 @@ public class Spielverwaltung implements NotifyCallback {
 			return;
 		}
 		if(!spielerListe.contains(newSpieler)) {
+			/*
+			 * Suche von dem neuen Spieler den Vorgaenger um seine ID als vorgaenger ID
+			 * Im neune Spieler zu setzten
+			 */
 			ID prevID = meinSpieler.getSpielerID();
 			for (Spieler spieler : spielerListe) {
 				if(spieler.getSpielerID().isInInterval(prevID, newSpieler.getSpielerID())) {
@@ -164,15 +168,29 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 			newSpieler.setPreviousPlayerID(prevID);
 			spielerListe.add(newSpieler);
+			/*
+			 * Aktualisier in vorgaenger IDs in den Spieler aus der Liste
+			 */
 			for (Spieler spieler : spielerListe) {
 				prevID = spieler.getPreviousPlayerID();
 				for (Spieler spieler2 : spielerListe) {
 					if (spieler2.getSpielerID().isInInterval(prevID, spieler.getSpielerID())) {
 						prevID = spieler2.getSpielerID();
 					}
-					spieler.setPreviousPlayerID(prevID);
+				}
+				spieler.setPreviousPlayerID(prevID);
+			}
+			/*
+			 * Aktualiesiere meine eigene vorgaenger ID
+			 */
+			prevID = meinSpieler.getPreviousPlayerID();
+			for (Spieler spieler : spielerListe) {
+				if (spieler.getSpielerID().isInInterval(prevID, meinSpieler.getSpielerID())) {
+					prevID = spieler.getSpielerID();
 				}
 			}
+			meinSpieler.setPreviousPlayerID(prevID);
+			
 			System.out.println("Source (NEU):"+newSpieler);
 			System.out.println("=== Spieler in der Liste ===");
 			for (Spieler spieler : spielerListe) {
