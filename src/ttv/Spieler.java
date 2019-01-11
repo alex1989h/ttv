@@ -100,7 +100,7 @@ public class Spieler {
 			return true;
 		if (obj == null)
 			return false;
-//		if (getClass() != obj.getClass())
+//		if (getClass() != obj.getClass())// Wegen der Vererbung
 //			return false;
 		Spieler other = (Spieler) obj;
 		if (spielerID == null) {

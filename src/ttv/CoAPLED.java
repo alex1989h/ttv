@@ -14,9 +14,10 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
  */
 enum Spielstatus{GRUEN, BLAU, VIOLETT, ROT}
 
-public class CoAPLED {
+public class CoAPLED implements Runnable{
 	
 	private CoapClient coapClient;
+	private Spielstatus status;
 	
 	/**
 	 * Constructor.
@@ -24,7 +25,7 @@ public class CoAPLED {
 	 */
 	public CoAPLED(URI uri) {
 		coapClient = new CoapClient(uri);
-		setLED(Spielstatus.GRUEN);
+		status = Spielstatus.GRUEN;
 	}
 	
 	/**
@@ -42,8 +43,11 @@ public class CoAPLED {
 			coapClient.put("b", MediaTypeRegistry.TEXT_PLAIN);
 			break;
 		case VIOLETT:
-			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);
-			coapClient.put("violet", MediaTypeRegistry.TEXT_PLAIN);//TODO:Rausfinden wie der Paylod für violette Farbe heißt
+			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);//ixperimental
+			coapClient.put("b", MediaTypeRegistry.TEXT_PLAIN);
+			coapClient.put("r", MediaTypeRegistry.TEXT_PLAIN);
+//			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);
+//			coapClient.put("violet", MediaTypeRegistry.TEXT_PLAIN);//TODO:Rausfinden wie der Paylod für violette Farbe heißt
 			break;
 		case ROT:
 			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);
@@ -53,6 +57,24 @@ public class CoAPLED {
 			System.out.println("ERROR: Unbekannter Spielstatus");
 			break;
 		}
+	}
+
+	@Override
+	public void run() {
+		while (!Thread.currentThread().isInterrupted()) {
+			setLED(status);
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
+	public void setLEDStatus(Spielstatus status) {
+		this.status = status;
 	}
 	
 	

@@ -31,6 +31,7 @@ public class SchiffeVersenken {
 	    
 		NotifyCallback meinSpieler = new Spielverwaltung(erstelle);
 	    System.out.println("Um das spiel zu starten gebe etwas ein");
+	    ((Spielverwaltung)meinSpieler).erstelleMeinenSpieler();
 	    eingabe = sc.next();
 		((Spielverwaltung)meinSpieler).erstelleSpiel();
 		sc.close();

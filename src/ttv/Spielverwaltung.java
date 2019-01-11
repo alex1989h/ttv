@@ -71,6 +71,7 @@ public class Spielverwaltung implements NotifyCallback {
 		try {
 			uri = new URI(SchiffeVersenken.COAPADDRESS);
 			led = new CoAPLED(uri);
+			new Thread(led).start();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
@@ -107,7 +108,7 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 			chord.asyncRetrieve(newTarget);
 		} else {
-			System.out.println("!!! ALLE SPIELER BESIEGT !!!");
+			testeAufBesiegteGegener();
 		}
 		System.out.println("==== RETRIEVED END ====");
 	}
@@ -251,6 +252,11 @@ public class Spielverwaltung implements NotifyCallback {
 				zielSpieler = spieler;
 				break;
 			}
+		}
+		/*
+		 * Es gib keine Spieler mit Schiffen
+		 */
+		if(zielSpieler != null) {
 			return zielSpieler;
 		}
 		/*
@@ -336,30 +342,26 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 		}
 		
+		/*
+		 * Aktualiesiere meine eigene vorgaenger ID
+		 */
+		ID prevID = meinSpieler.getPreviousPlayerID();
+		for (Spieler spieler : spielerListe) {
+			if(prevID == null) {
+				prevID = spieler.getSpielerID();
+			}else if (spieler.getSpielerID().isInInterval(prevID, meinSpieler.getSpielerID())) {
+				prevID = spieler.getSpielerID();
+			}
+		}
+		meinSpieler.setPreviousPlayerID(prevID);
 	}
 	
 	/**
-	 * Erstellt unseren eingenen Spieler mit der ID von Chord und unseren vorgänger ID.
-	 * Setzt auf die 100 Feldern 10 Schiffe auf zufählige Positionen/Feldern.
 	 * Aktualisiert Spieler-Liste.
 	 * Schaut, ob wir die größtmöglich ID verwalten, wenn ja dürfen wir zuerst Schießen
 	 */
 	public void erstelleSpiel() {
-		meinSpieler = new MeinSpieler(SchiffeVersenken.ANZAHLINTERVALLE, chord.getID(), chord.getPredecessorID());
-		 List<Integer> list = new ArrayList<Integer>();
-		 
-		 for(int i=0;i<SchiffeVersenken.ANZAHLSCHIFFE;i++) {
-			 Random rand = new Random();
-			 int zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
-			 
-			 while(list.contains(zahl)) {
-				 zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
-			 }
-			 list.add(zahl);
-		 }
-		 meinSpieler.setzeSchiffe(list);
-		 aktualisiertSpieler();
-		 
+		aktualisiertSpieler();
 		 System.out.println("ICH: "+meinSpieler);
 		 for (Spieler spieler : spielerListe) {
 			System.out.println("GEG: "+spieler);
@@ -435,12 +437,21 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	public boolean testeAufBesiegteGegener() {
 		boolean gibtsBesiegte = false;
+		boolean alleGegnerBesiegt = true;
 		for (Spieler spieler : spielerListe) {
 			if(spieler.getHits() >= SchiffeVersenken.ANZAHLSCHIFFE) {
-				System.out.println("!!!!!!!!!!!!!!!!! SPIELER WURDE BESIEGT !!!!!!!!!!!!!!!!!");
+				if(!gibtsBesiegte) {
+					System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! BESIEGTE SPIELER !!!!!!!!!!!!!!!!!!!!!!!!");
+				}
 				System.out.println("BESIEGT: "+spieler);
 				gibtsBesiegte=true;
+			} else {
+				alleGegnerBesiegt = false;
 			}
+		}
+		if(alleGegnerBesiegt) {
+			System.out.println(">>>>!!!!!!!!!!!!!!!!!!!!!!!! ALLE GEGNER BESIEGT !!!!!!!!!!!!!!!!!!!!!!!!<<<<");
+		
 		}
 		return gibtsBesiegte;
 	}
@@ -449,14 +460,34 @@ public class Spielverwaltung implements NotifyCallback {
 		int versenkt = meinSpieler.getHits();
 		double prozentVersenkt = (100.0/SchiffeVersenken.ANZAHLSCHIFFE)*versenkt;
 		if(versenkt == 0) {
-			led.setLED(Spielstatus.GRUEN);
+			led.setLEDStatus(Spielstatus.GRUEN);
 		}else if(prozentVersenkt < 50) {
-			led.setLED(Spielstatus.BLAU);
+			led.setLEDStatus(Spielstatus.BLAU);
 		}else if(prozentVersenkt >= 50 && versenkt < SchiffeVersenken.ANZAHLSCHIFFE) {
-			led.setLED(Spielstatus.VIOLETT);
+			led.setLEDStatus(Spielstatus.VIOLETT);
 		}else {
-			led.setLED(Spielstatus.ROT);
+			led.setLEDStatus(Spielstatus.ROT);
 		}
+	}
+	
+	/**
+	 * Erstellt unseren eingenen Spieler mit der ID von Chord und unseren vorgänger ID.
+	 * Setzt auf die 100 Feldern 10 Schiffe auf zufählige Positionen/Feldern.
+	 */
+	public void erstelleMeinenSpieler() {
+		meinSpieler = new MeinSpieler(SchiffeVersenken.ANZAHLINTERVALLE, chord.getID(), chord.getPredecessorID());
+		 List<Integer> list = new ArrayList<Integer>();
+		 
+		 for(int i=0;i<SchiffeVersenken.ANZAHLSCHIFFE;i++) {
+			 Random rand = new Random();
+			 int zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
+			 
+			 while(list.contains(zahl)) {
+				 zahl = rand.nextInt(SchiffeVersenken.ANZAHLINTERVALLE);
+			 }
+			 list.add(zahl);
+		 }
+		 meinSpieler.setzeSchiffe(list);
 	}
 	
 	

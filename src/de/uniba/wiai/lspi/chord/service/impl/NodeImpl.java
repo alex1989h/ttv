@@ -430,7 +430,7 @@ public final class NodeImpl extends Node {
 	}
 	
 	/**
-	 * Die Methode 
+	 * Diese Methode Methode wirde von einem anderen Node aufgerufen 
 	 */
 	@Override
 	public final void broadcast(Broadcast info) throws CommunicationException {
@@ -438,27 +438,48 @@ public final class NodeImpl extends Node {
 			this.logger.debug(" Send broadcast message");
 		}
 		System.out.println("NodeImpl: Send broadcast message. Transaktion: "+info.getTransaction());
+		/*
+		 * Aktualisiere die lokale Transaktions-ID auf die erhaltenet Transaktions-ID,
+		 * wenn die lokale Transaktions-ID kleiner ist
+		 */
 		if(Transaction.ID < info.getTransaction()) {
 			Transaction.ID = info.getTransaction();
 		}
 		
-		
+		/*
+		 * Holle die FingerTabele und sortiere sie.
+		 * Die sortiere Tabelle ist richtig von unserem Node aus sortiert
+		 */
 		List<Node> fingertable = this.impl.getFingerTable();
 		this.impl.sortFingerTable(fingertable);
 		
 		ID range = null;
+		/*
+		 * Aktualisiere die Range und schicke den Broadcast ab
+		 */
 		for (int i = 0; i < fingertable.size(); i++) {
-			
-			
 			if (i == (fingertable.size() - 1)) {
-				range = this.impl.getID();
-			} else if (fingertable.get(i).getNodeID() == fingertable.get(i + 1).getNodeID()) {
+				range = this.impl.getID();//Es ist der letzte Node, also sind wir seine Range
+			} else if (fingertable.get(i).getNodeID().compareTo(fingertable.get(i + 1).getNodeID()) == 0) {
+				/*
+				 * Ist der nächste Node der gleich wie der aktueller (kann vorkommen), 
+				 * sollte einfach der nächste Node aus der Tabelle genomen werden.
+				 * So geht man sicher, dass die Range wirklich der nächste Node ist
+				 */
 				continue;
 			} else {
+				// Nächster Node ist die Range
 				range = fingertable.get(i + 1).getNodeID();
 			}
 			
-			if(fingertable.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) {  
+			/*
+			 * Schicke den Broadcast nur ab, wenn der Node innerhalb der von Broadcast
+			 * erhaltene Range liegt
+			 */
+			if(fingertable.get(i).getNodeID().isInInterval(this.impl.getID(), info.getRange())) { 
+				/*
+				 * Die Range sollte nicht größer sein als die erhaltene Range vom Broadcast
+				 */
 				if(!(range.isInInterval(fingertable.get(i).getNodeID(), info.getRange()))) {
 					range = info.getRange();
 				}
@@ -472,6 +493,12 @@ public final class NodeImpl extends Node {
 		}
 	}
 	
+	/**
+	 * Diese Methode stellt sicher, dass der Broadcast nicht blockierend ist, also asynchron
+	 * @param node
+	 * @param range
+	 * @param info
+	 */
 	public void asyncBroadcast(final Node node, final ID range, final Broadcast info) {
 		Runnable threadBroadcast = new Runnable() {
 			@Override

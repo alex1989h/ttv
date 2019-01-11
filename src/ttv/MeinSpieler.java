@@ -12,7 +12,6 @@ public class MeinSpieler extends Spieler {
 	}
 	
 	public void setzeSchiffe(List<Integer> list) {
-		
 		for (int i = 0; i < list.size(); i++) {
 			felder[list.get(i)]=2;
 		}

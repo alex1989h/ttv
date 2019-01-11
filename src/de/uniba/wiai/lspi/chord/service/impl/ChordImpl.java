@@ -1134,24 +1134,6 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 		}
 	}
 
-	public void mySort(List<Node> list) {
-		Collections.sort(list, new Comparator<Node>() {
-			@Override
-			public int compare(Node o1, Node o2) {
-				ID myId = getID();
-				int comp1 = o1.getNodeID().compareTo(myId);
-				int comp2 = o2.getNodeID().compareTo(myId);
-				if ((comp1 * comp2) > 0) {
-					return o1.compareTo(o2);
-				}
-				if ((comp1 + comp2) > 0) {
-					return o1.compareTo(o2);
-				}
-				return o2.compareTo(o1);
-			}
-		});
-	}
-
 	public void setCallback (NotifyCallback callback) {
 		if (callback == null) {
 			NullPointerException e = new NullPointerException(
@@ -1179,6 +1161,10 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 		}
 	}
 	
+	/**
+	 * Ein asyncroner Aufruf von retrieve
+	 * @param targetID
+	 */
 	public void asyncRetrieve(final ID targetID) {
 		Runnable threadRetrieve = new Runnable() {
 			@Override
@@ -1191,8 +1177,9 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 	}
 	
 	/**
-	 * Die Methode sortiert die Finger Table, so dass unsere Id an erster Stelle steht.
-	 * Anschließend folgt immer der nächst höhere Eintrag im Chord-Ring.
+	 * Die Methode sortiert die Finger Table von unseren ID ausgehend den ganzen Chord-Ring
+	 * aufsteigen. Beispiel IDs {1,2,3,5,6} und wir haben die ID 4
+	 * Sortiere List: {5,6,1,2,3}
 	 * @param list
 	 */
 	public void sortFingerTable(List<Node> list) {
