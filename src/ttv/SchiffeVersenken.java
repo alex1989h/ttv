@@ -1,7 +1,5 @@
 package ttv;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Scanner;
 import de.uniba.wiai.lspi.chord.service.NotifyCallback;
 
@@ -15,7 +13,7 @@ public class SchiffeVersenken {
 	
 	public static String BOOTSTRPADDRESS = "://localhost:8080/";
 	
-	public static String COAPADDRESS = "coap://localhost:5683/led";
+	public static String COAPADDRESS = "coap://localhost/led";
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
@@ -37,38 +35,4 @@ public class SchiffeVersenken {
 		((Spielverwaltung)meinSpieler).erstelleSpiel();
 		sc.close();
 	}
-	
-	
-	/**
-	 * Nur um die LED zu testen
-	 */
-	public static void testled() {
-		Scanner sc = new Scanner(System.in);
-		System.out.print("Gebe port ein: ");
-		String eingabe = sc.next();
-		
-		URI uri = null;
-		CoAPLED led = null;
-		try {
-			uri = new URI("coap://localhost:5683/led");
-			led = new CoAPLED(uri);
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-		
-		while(!eingabe.equals("s")) {
-			 eingabe = sc.next();
-			if(eingabe.equals("g")) {
-				led.setLED(Spielstatus.GRUEN);
-			}else if(eingabe.equals("b")) {
-				led.setLED(Spielstatus.BLAU);
-			}else if(eingabe.equals("v")) {
-				led.setLED(Spielstatus.VIOLETT);
-			}else if(eingabe.equals("r")){
-				led.setLED(Spielstatus.ROT);
-			}
-		}
-		sc.close();
-	}
-
 }
