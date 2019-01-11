@@ -2,6 +2,8 @@ package ttv;
 
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -22,6 +24,8 @@ public class Spielverwaltung implements NotifyCallback {
 	
 	private ChordImpl chord;
 	
+	private CoAPLED led;
+	
 	 public Spielverwaltung(boolean createChordNetwork) {
 		PropertiesLoader.loadPropertyFile();
 		spielerListe = new ArrayList<Spieler>();
@@ -37,6 +41,7 @@ public class Spielverwaltung implements NotifyCallback {
 		chord.setCallback(this);
 		
 		if(createChordNetwork) {
+			// Erstelle einen Netzwerk
 			try {
 				chord.create(localURL);
 				System.out.println("Netzwerk erstellt");
@@ -44,7 +49,7 @@ public class Spielverwaltung implements NotifyCallback {
 				throw new RuntimeException ( " Could not create DHT !" , e ) ;
 			}
 		}
-		//Join existing network.
+		//Trette einem Netzwerk bei.
 		else {
 			URL bootstrapURL = null;
 			try {
@@ -58,6 +63,16 @@ public class Spielverwaltung implements NotifyCallback {
 			} catch (ServiceException e) {
 				throw new RuntimeException ( " Could not join DHT ! " , e );
 			}
+		}
+		/*
+		 * Erstelle einen Kontroller für die LED
+		 */
+		URI uri = null;
+		try {
+			uri = new URI(SchiffeVersenken.COAPADDRESS);
+			led = new CoAPLED(uri);
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -79,6 +94,7 @@ public class Spielverwaltung implements NotifyCallback {
 		aktualisiertSpieler();
 		boolean treffer = wurdMeinSchiffVersenkt(target);
 		System.out.println("Wurde ICH getroffen: "+ treffer);
+		setzteDieLED();
 		chord.broadcast(target, treffer);
 		Spieler zielSpieler = waehleZiel();
 		if(zielSpieler != null) {
@@ -428,4 +444,20 @@ public class Spielverwaltung implements NotifyCallback {
 		}
 		return gibtsBesiegte;
 	}
+	
+	private void setzteDieLED() {
+		int versenkt = meinSpieler.getHits();
+		double prozentVersenkt = (100.0/SchiffeVersenken.ANZAHLSCHIFFE)*versenkt;
+		if(versenkt == 0) {
+			led.setLED(Spielstatus.GRUEN);
+		}else if(prozentVersenkt < 50) {
+			led.setLED(Spielstatus.BLAU);
+		}else if(prozentVersenkt >= 50 && versenkt < SchiffeVersenken.ANZAHLSCHIFFE) {
+			led.setLED(Spielstatus.VIOLETT);
+		}else {
+			led.setLED(Spielstatus.ROT);
+		}
+	}
+	
+	
 }

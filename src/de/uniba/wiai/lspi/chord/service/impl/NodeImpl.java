@@ -437,7 +437,7 @@ public final class NodeImpl extends Node {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
-		System.out.println("NodeImpl: Send broadcast message");
+		System.out.println("NodeImpl: Send broadcast message. Transaktion: "+info.getTransaction());
 		if(Transaction.ID < info.getTransaction()) {
 			Transaction.ID = info.getTransaction();
 		}
