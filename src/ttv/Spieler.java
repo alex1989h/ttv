@@ -8,6 +8,7 @@ import de.uniba.wiai.lspi.chord.data.ID;
 public class Spieler {
 	
 	private int id;
+	
 	private static int ids = 0;
 	
 	protected int[] felder;
@@ -112,6 +113,11 @@ public class Spieler {
 	
 	@Override
 	public String toString() {
-		return "Spieler+ "+id+":\nID: "+spielerID+"\nPrevID: "+previousPlayerID;
+		String myID = spielerID.toString();
+		String prevID = previousPlayerID.toString();
+		myID = myID.substring(0, 12) + " ... " + myID.substring(myID.length() - 12);
+		prevID = prevID.substring(0, 12) + "... " + prevID.substring(prevID.length() - 12);
+		return "Spieler " + id + " ID: " + myID + " PrevID: " + prevID + " Hits: " + getHits() + " Frei: "
+				+ getVerfuegbareFelder().size();
 	}
 }
