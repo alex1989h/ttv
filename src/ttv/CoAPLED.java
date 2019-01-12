@@ -43,7 +43,7 @@ public class CoAPLED implements Runnable{
 			coapClient.put("b", MediaTypeRegistry.TEXT_PLAIN);
 			break;
 		case VIOLETT:
-			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);//ixperimental
+			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);
 			coapClient.put("b", MediaTypeRegistry.TEXT_PLAIN);
 			coapClient.put("r", MediaTypeRegistry.TEXT_PLAIN);
 //			coapClient.put("1", MediaTypeRegistry.TEXT_PLAIN);

@@ -460,6 +460,9 @@ public class Spielverwaltung implements NotifyCallback {
 		return gibtsBesiegte;
 	}
 	
+	/**
+	 * Setzt die LED
+	 */
 	private void setzteDieLED() {
 		int versenkt = meinSpieler.getHits();
 		double prozentVersenkt = (100.0/SchiffeVersenken.ANZAHLSCHIFFE)*versenkt;
