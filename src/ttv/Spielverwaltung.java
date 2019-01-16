@@ -91,26 +91,27 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	@Override
 	public void retrieved(ID target) {
-		System.out.println("==== RETRIEVED (Auf mich wurde geschoﬂen) ====");
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("==== RETRIEVED (Auf mich wurde geschoﬂen) ====");
 		aktualisiertSpieler();
 		boolean treffer = wurdMeinSchiffVersenkt(target);
-		System.out.println("Wurde ICH getroffen: "+ treffer);
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Wurde ICH getroffen: "+ treffer);
+		if(meinSpieler.getHits() >= SchiffeVersenken.ANZAHLSCHIFFE) System.out.println("!!!!! ICH WURDE BESIEGT !!!!!");
 		setzteDieLED();
 		chord.broadcast(target, treffer);
 		Spieler zielSpieler = waehleZiel();
 		if(zielSpieler != null) {
-			System.out.println("Mein Angriffziel: "+zielSpieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Mein Angriffziel: "+zielSpieler);
 			ID newTarget = waehleTarget(zielSpieler);
 			if(newTarget.isInInterval(zielSpieler.getPreviousPlayerID(), zielSpieler.getSpielerID())) {
-				System.out.println("Die Ziel-ID ist im richtigen Bereich vom Spieler");
+				if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Die Ziel-ID ist im richtigen Bereich vom Spieler");
 			}else {
-				System.out.println("ACHTUNG: Die Ziel-ID ist nicht imrichtigen Bereich vom Spieler");
+				if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("ACHTUNG: Die Ziel-ID ist nicht imrichtigen Bereich vom Spieler");
 			}
 			chord.asyncRetrieve(newTarget);
 		} else {
 			testeAufBesiegteGegener();
 		}
-		System.out.println("==== RETRIEVED END ====");
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("==== RETRIEVED END ====");
 	}
 	
 
@@ -126,15 +127,15 @@ public class Spielverwaltung implements NotifyCallback {
 	 */
 	@Override
 	public void broadcast(ID source, ID target, Boolean hit) {
-		System.out.println("==== BROADCAST (Auf jemanden wurde geschoﬂen) ====");
-		System.out.println("Source: "+source+" Target: "+target+" Hit: "+hit);
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("==== BROADCAST (Auf jemanden wurde geschoﬂen) ====");
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Source: "+source+" Target: "+target+" Hit: "+hit);
 		aktualisiertSpieler();
 		fuegeSpielerHinzu(source);
 		for (Spieler spieler : spielerListe) {
 			aktualisiereFeld(target,hit,spieler);
 		}
 		testeAufBesiegteGegener();
-		System.out.println("==== BROADCAST END ====");
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("==== BROADCAST END ====");
 	}
 
 	/**
@@ -151,10 +152,10 @@ public class Spielverwaltung implements NotifyCallback {
 				target.equals(spieler.getSpielerID())) {
 			int index = iDToIndex(target, spieler);
 			spieler.feldaktualisieren(index, hit);
-			System.out.println("=== Aktualisiere Feld ===");
-			System.out.println(spieler);
-			System.out.println("Index: "+index+" Getroffen: "+hit+" Target-ID: "+target);
-			System.out.println("=== Aktualisiere Feld END ===");
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("=== Aktualisiere Feld ===");
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println(spieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Index: "+index+" Getroffen: "+hit+" Target-ID: "+target);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("=== Aktualisiere Feld END ===");
 		}
 	}
 
@@ -169,7 +170,7 @@ public class Spielverwaltung implements NotifyCallback {
 	private void fuegeSpielerHinzu(ID source) {
 		Spieler newSpieler = new Spieler(SchiffeVersenken.ANZAHLINTERVALLE, source, null);
 		if(newSpieler.equals(meinSpieler)){
-			System.out.println("Source (ICH):"+meinSpieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Source (ICH):"+meinSpieler);
 			return;
 		}
 		if(!spielerListe.contains(newSpieler)) {
@@ -208,16 +209,16 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 			meinSpieler.setPreviousPlayerID(prevID);
 			
-			System.out.println("Source (NEU):"+newSpieler);
-			System.out.println("=== Spieler in der Liste ===");
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Source (NEU):"+newSpieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("=== Spieler in der Liste ===");
 			for (Spieler spieler : spielerListe) {
-				System.out.println(spieler);
+				if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println(spieler);
 			}
-			System.out.println("=== Spieler in der Liste END ===");
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("=== Spieler in der Liste END ===");
 		}else {
 			int index = spielerListe.indexOf(newSpieler);
 			newSpieler = spielerListe.get(index);
-			System.out.println("Source (GEG):"+newSpieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Source (GEG):"+newSpieler);
 		}
 	}
 
@@ -233,7 +234,7 @@ public class Spielverwaltung implements NotifyCallback {
 		int zahl = rand.nextInt(leererFelder.size());
 		int index = leererFelder.get(zahl);
 		ID id = indexToID(index, zielSpieler);
-		System.out.println("Ziel-Index: "+index+" Ziel-ID: "+id);
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Ziel-Index: "+index+" Ziel-ID: "+id);
 		return id;
 	}
 	
@@ -290,8 +291,8 @@ public class Spielverwaltung implements NotifyCallback {
 				target.equals(meinSpieler.getSpielerID())) {
 			int index = iDToIndex(target, meinSpieler);
 			getroffen = meinSpieler.angriff(index);
-			System.out.println("ICH: " + meinSpieler);
-			System.out.println("ICH: Index: " + index + " Getroffen: " + getroffen + " Target-ID: " + target);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("ICH: " + meinSpieler);
+			if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("ICH: Index: " + index + " Getroffen: " + getroffen + " Target-ID: " + target);
 		}
 		return getroffen;
 	}

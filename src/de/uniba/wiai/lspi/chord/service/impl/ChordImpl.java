@@ -61,6 +61,7 @@ import de.uniba.wiai.lspi.chord.service.NotifyCallback;
 import de.uniba.wiai.lspi.chord.service.Report;
 import de.uniba.wiai.lspi.chord.service.ServiceException;
 import de.uniba.wiai.lspi.util.logging.Logger;
+import ttv.SchiffeVersenken;
 import ttv.Transaction;
 
 /**
@@ -1124,7 +1125,7 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 	@Override
 	public void broadcast(ID target, Boolean hit) {
 		this.logger.debug("App called broadcast");
-		System.out.println("Impl: App called broadcast");
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Impl: App called broadcast");
 		Transaction.ID++;
 		Broadcast info = new Broadcast(this.getID(), this.getID(), target, Transaction.ID, hit);
 		try {

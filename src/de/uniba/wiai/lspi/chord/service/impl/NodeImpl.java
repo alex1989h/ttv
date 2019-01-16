@@ -50,6 +50,7 @@ import de.uniba.wiai.lspi.chord.data.ID;
 import de.uniba.wiai.lspi.chord.data.URL;
 import de.uniba.wiai.lspi.chord.service.NotifyCallback;
 import de.uniba.wiai.lspi.util.logging.Logger;
+import ttv.SchiffeVersenken;
 import ttv.Transaction;
 
 /**
@@ -437,7 +438,7 @@ public final class NodeImpl extends Node {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
-		System.out.println("NodeImpl: Send broadcast message. Transaktion: "+info.getTransaction());
+		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("NodeImpl: Send broadcast message. Transaktion: "+info.getTransaction());
 		/*
 		 * Aktualisiere die lokale Transaktions-ID auf die erhaltenet Transaktions-ID,
 		 * wenn die lokale Transaktions-ID kleiner ist
