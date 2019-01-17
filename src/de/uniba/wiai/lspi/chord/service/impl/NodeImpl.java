@@ -438,7 +438,7 @@ public final class NodeImpl extends Node {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
-		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("NodeImpl: Send broadcast message. Transaktion: "+info.getTransaction());
+		System.out.println("Transaktion: "+info.getTransaction());
 		/*
 		 * Aktualisiere die lokale Transaktions-ID auf die erhaltenet Transaktions-ID,
 		 * wenn die lokale Transaktions-ID kleiner ist

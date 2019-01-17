@@ -109,6 +109,7 @@ public class Spielverwaltung implements NotifyCallback {
 			}
 			chord.asyncRetrieve(newTarget);
 		} else {
+			System.out.println("==== RETRIEVED ====");
 			testeAufBesiegteGegener();
 		}
 		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("==== RETRIEVED END ====");
@@ -446,7 +447,8 @@ public class Spielverwaltung implements NotifyCallback {
 		for (Spieler spieler : spielerListe) {
 			if(spieler.getHits() >= SchiffeVersenken.ANZAHLSCHIFFE) {
 				if(!gibtsBesiegte) {
-					System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! BESIEGTE SPIELER !!!!!!!!!!!!!!!!!!!!!!!!");
+					System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n"
+							         + "!!!!!!!!!!!!!!!!!!!!!!!! BESIEGTE SPIELER !!!!!!!!!!!!!!!!!!!!!!!!");
 				}
 				System.out.println("BESIEGT: "+spieler);
 				gibtsBesiegte=true;
