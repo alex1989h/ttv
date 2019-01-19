@@ -14,8 +14,6 @@ public class SchiffeVersenken {
 	public static String BOOTSTRPADDRESS = "://localhost:8080/";
 
 	public static String COAPADDRESS = "coap://localhost/led";
-	
-	public static String AUSGABE = "no";
 
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
@@ -56,10 +54,6 @@ public class SchiffeVersenken {
 			erstelle = false;
 		}
 		
-		System.out.print("Soll nur wenn jemand besiegt wurde ne Ausgabe erfolgen (yes/no): ");
-		SchiffeVersenken.AUSGABE = sc.next();
-		
-
 		NotifyCallback meinSpieler = new Spielverwaltung(erstelle);
 		System.out.println("Um das spiel zu starten gebe etwas ein");
 		((Spielverwaltung) meinSpieler).erstelleMeinenSpieler();

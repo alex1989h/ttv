@@ -1125,9 +1125,7 @@ public final class ChordImpl implements Chord, Report, AsynChord {
 	@Override
 	public void broadcast(ID target, Boolean hit) {
 		this.logger.debug("App called broadcast");
-		if(!SchiffeVersenken.AUSGABE.equals("yes")) System.out.println("Impl: App called broadcast");
-		Transaction.ID++;
-		Broadcast info = new Broadcast(this.getID(), this.getID(), target, Transaction.ID, hit);
+		Broadcast info = new Broadcast(this.getID(), this.getID(), target, Transaction.getID(), hit);
 		try {
 			localNode.broadcast(info);
 		} catch (CommunicationException e) {

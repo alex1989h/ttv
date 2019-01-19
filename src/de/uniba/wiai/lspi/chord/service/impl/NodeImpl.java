@@ -429,7 +429,7 @@ public final class NodeImpl extends Node {
 	final Executor getAsyncExecutor() {
 		return this.asyncExecutor;
 	}
-	
+	public static final Object lockA = new Object();
 	/**
 	 * Diese Methode Methode wirde von einem anderen Node aufgerufen 
 	 */
@@ -438,14 +438,12 @@ public final class NodeImpl extends Node {
 		if (this.logger.isEnabledFor(DEBUG)) {
 			this.logger.debug(" Send broadcast message");
 		}
-		System.out.println("Transaktion: "+info.getTransaction());
+//		System.out.println("Transaktion: "+info.getTransaction());
 		/*
 		 * Aktualisiere die lokale Transaktions-ID auf die erhaltenet Transaktions-ID,
 		 * wenn die lokale Transaktions-ID kleiner ist
 		 */
-		if(Transaction.ID < info.getTransaction()) {
-			Transaction.ID = info.getTransaction();
-		}
+		Transaction.setID(info.getTransaction() + 1);
 		
 		/*
 		 * Holle die FingerTabele und sortiere sie.
