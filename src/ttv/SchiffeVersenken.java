@@ -44,9 +44,13 @@ public class SchiffeVersenken {
 			COAPADDRESS = "coap://" + args[2];
 		}
 		System.out.println("CoAp-Address: " + COAPADDRESS);
-		System.out.print("Soll Netwerk erstellt werden (yes/no): ");
-		eingabe = sc.next();
-		
+		if(args.length < 4) {
+			System.out.print("Soll Netwerk erstellt werden (yes/no): ");
+			eingabe = sc.next();
+		}else {
+			eingabe = args[3];
+		}
+		System.out.println("Netwerk erstellen: " + eingabe);
 		boolean erstelle = true;
 		if (eingabe.equals("yes")) {
 			erstelle = true;
@@ -55,8 +59,8 @@ public class SchiffeVersenken {
 		}
 		
 		NotifyCallback meinSpieler = new Spielverwaltung(erstelle);
-		System.out.println("Um das spiel zu starten gebe etwas ein");
 		((Spielverwaltung) meinSpieler).erstelleMeinenSpieler();
+		System.out.println("Um das spiel zu starten gebe etwas ein");
 		eingabe = sc.next();
 		((Spielverwaltung) meinSpieler).erstelleSpiel();
 		sc.close();
